@@ -20,4 +20,4 @@ df_cleaned = df_cleaned.drop(indices_to_drop)
 df_cleaned = df_cleaned.drop(
     ['type_sale', 'sale_type', 'has_balcony', 'life_annuity'], axis=1)
 
-df_cleaned.to_csv("houses_cleaned", index=False)
+df_cleaned.to_csv("houses_cleaned.csv", index=False)
