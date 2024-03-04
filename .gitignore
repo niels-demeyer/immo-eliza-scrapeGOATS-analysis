@@ -6,6 +6,8 @@ __pycache__/
 # C extensions
 *.so
 
+BELGIUM_-_Municipalities.geojson
+
 # Distribution / packaging
 .Python
 build/
