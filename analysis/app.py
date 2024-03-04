@@ -7,5 +7,6 @@ streamlit_app = StreamLitClass()
 streamlit_app.load_houses_data_pandas()
 streamlit_app.load_geojson()
 
-# Plot the most expensive houses average
-streamlit_app.plot_most_expensive_houses_average()
+# Get the province for each city
+for city in streamlit_app.houses_data["city"].unique():
+    streamlit_app.get_province(city)

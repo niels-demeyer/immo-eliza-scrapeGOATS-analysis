@@ -40,8 +40,10 @@ class StreamLitClass:
         avg_price = self.calculate_average_price("city", "price")
         self.plot_map(avg_price, "city", "properties.Communes", "price")
 
-    def get_province(self, city):
-        return self.geojson[self.geojson["Communes"] == city]["Provinces"].values[0]
+    def plot_count_houses(self):
+        count_houses = self.houses_data["city"].value_counts().reset_index()
+        count_houses.columns = ["city", "count"]
+        self.plot_map(count_houses, "city", "properties.Communes", "count")
 
     def plot_map(self, avg_price, locations, featureidkey, color):
         fig = px.choropleth_mapbox(
@@ -74,5 +76,14 @@ class StreamLitClass:
         self.load_houses_data_pandas()
         self.load_geojson()
 
-        # plot the average price per municipality
-        self.plot_most_expensive_houses_average()
+        # Create a sidebar selectbox for the plot selection
+        plot_option = st.sidebar.selectbox(
+            "Select a plot",
+            ("Average Price per Municipality", "Count of Houses per Municipality"),
+        )
+
+        # Display the selected plot
+        if plot_option == "Average Price per Municipality":
+            self.plot_most_expensive_houses_average()
+        elif plot_option == "Count of Houses per Municipality":
+            self.plot_count_houses()
