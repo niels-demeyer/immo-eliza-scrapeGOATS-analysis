@@ -17,12 +17,18 @@ def load_geojson():
     data = gpd.read_file(file_path)
     return data
 
+def calculate_average_price(data, group_by_column, agg_column):
+    return data.groupby(group_by_column)[agg_column].mean().reset_index()
+
+
 def plot_most_expensive_houses_average(data):
-    # get the average price per municipality
-    avg_price = data.groupby('city').price.mean().reset_index()
-    # plot the average price per municipality on a map
-    fig = px.choropleth_mapbox(avg_price, geojson=geojson, locations='city', featureidkey="properties.NAME_4",
-                               color='price',
+    avg_price = calculate_average_price(data, 'city', 'price')
+    plot_map(avg_price, geojson, 'city', "properties.NAME_4", 'price')
+
+
+def plot_map(avg_price, geojson, locations, featureidkey, color):
+    fig = px.choropleth_mapbox(avg_price, geojson=geojson, locations=locations, featureidkey=featureidkey,
+                               color=color,
                                mapbox_style="carto-positron",
                                zoom=6, center = {"lat": 50.8503, "lon": 4.3517},
                                opacity=0.5,
@@ -48,4 +54,3 @@ def main():
     
 if __name__ == '__main__':
     main()
-    
