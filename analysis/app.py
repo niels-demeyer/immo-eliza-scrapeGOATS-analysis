@@ -33,16 +33,15 @@ def plot_most_expensive_houses_average(data, geojson):
 def plot_map(avg_price, geojson, locations, featureidkey, color):
     fig = px.choropleth_mapbox(avg_price, geojson=geojson.__geo_interface__, locations=locations, featureidkey=featureidkey,
                                color=color,
-                               color_continuous_scale="cividis",  # use the Cividis color scale
-                               range_color=(avg_price[color].min(), avg_price[color].max()),  # adjust the legend based on the max average price
+                               color_continuous_scale="YlOrRd",  # use the YlOrRd color scale
+                               range_color=(0, 2500000),  # set the min and max values of the legend
                                mapbox_style="carto-positron",
                                zoom=5, center = {"lat": 50.8503, "lon": 4.3517},
                                opacity=0.5,
                                labels={'price':'Average price per municipality'}
                               )
-    st.plotly_chart(fig)  # display the plot in the Streamlit app
-
-# make the streamlit app
+    st.plotly_chart(fig, use_container_width=True)  # display the plot in the Streamlit app
+    
 def streamlit_app():
     st.set_page_config(page_title='Belgium Real Estate Analysis', layout='wide')
     
@@ -53,14 +52,12 @@ def streamlit_app():
     houses_data = load_houses_data_pandas()
     geojson = load_geojson()
     
+    # avg_price = calculate_average_price(houses_data, 'city', 'price')
+    # st.write(avg_price)
+    
     # plot the average price per municipality
     plot_most_expensive_houses_average(houses_data, geojson)
     
-    # Display data on the page
-    if st.sidebar.checkbox('Show raw data'):
-        st.subheader('Raw Data')
-        st.write(houses_data)
-
 def main():
     streamlit_app()
     
