@@ -8,41 +8,42 @@ from plotly import express as px
 
 class StreamLitClass:
     def __init__(self):
-        pass
+        self.houses_data = None
+        self.geojson = None
 
     # Load the houses data
     def load_houses_data_pandas(self):
         script_dir = os.path.dirname(__file__)
         rel_path = "../data/raw/houses_cleaned.csv"
         file_path = os.path.join(script_dir, rel_path)
-        data = pd.read_csv(file_path)
-        data["city"] = (
-            data["city"].str.lower().str.strip()
+        self.houses_data = pd.read_csv(file_path)
+        self.houses_data["city"] = (
+            self.houses_data["city"].str.lower().str.strip()
         )  # convert city names to lowercase and remove whitespaces
-        return data
 
     # Load the geojson file
     def load_geojson(self):
         script_dir = os.path.dirname(__file__)
         rel_path = "../data/raw/BELGIUM_-_Municipalities.geojson"
         file_path = os.path.join(script_dir, rel_path)
-        data = gpd.read_file(file_path)
-        data["Communes"] = (
-            data["Communes"].str.lower().str.strip()
+        self.geojson = gpd.read_file(file_path)
+        self.geojson["Communes"] = (
+            self.geojson["Communes"].str.lower().str.strip()
         )  # convert city names to lowercase and remove whitespaces
-        return data
 
-    def calculate_average_price(self, data, group_by_column, agg_column):
-        return data.groupby(group_by_column)[agg_column].mean().reset_index()
+    def calculate_average_price(self, group_by_column, agg_column):
+        return (
+            self.houses_data.groupby(group_by_column)[agg_column].mean().reset_index()
+        )
 
-    def plot_most_expensive_houses_average(self, data, geojson):
-        avg_price = self.calculate_average_price(data, "city", "price")
-        self.plot_map(avg_price, geojson, "city", "properties.Communes", "price")
+    def plot_most_expensive_houses_average(self):
+        avg_price = self.calculate_average_price("city", "price")
+        self.plot_map(avg_price, "city", "properties.Communes", "price")
 
-    def plot_map(self, avg_price, geojson, locations, featureidkey, color):
+    def plot_map(self, avg_price, locations, featureidkey, color):
         fig = px.choropleth_mapbox(
             avg_price,
-            geojson=geojson.__geo_interface__,
+            geojson=self.geojson.__geo_interface__,
             locations=locations,
             featureidkey=featureidkey,
             color=color,
@@ -58,7 +59,7 @@ class StreamLitClass:
             fig, use_container_width=True
         )  # display the plot in the Streamlit app
 
-    def streamlit_app():
+    def streamlit_app(self):
         st.set_page_config(page_title="Belgium Real Estate Analysis", layout="wide")
 
         st.title("Belgium Real Estate Analysis")
@@ -67,11 +68,8 @@ class StreamLitClass:
         )
 
         # load the data
-        houses_data = load_houses_data_pandas()
-        geojson = load_geojson()
-
-        # avg_price = calculate_average_price(houses_data, 'city', 'price')
-        # st.write(avg_price)
+        self.load_houses_data_pandas()
+        self.load_geojson()
 
         # plot the average price per municipality
-        plot_most_expensive_houses_average(houses_data, geojson)
+        self.plot_most_expensive_houses_average()
