@@ -4,12 +4,22 @@ import pandas as pd
 import os
 import json
 from plotly import express as px
+from plotly import graph_objs as go
 
 
 class StreamLitClass:
     def __init__(self):
         self.houses_data = None
         self.geojson = None
+        self.count_houses = None
+        self.avg_price = None
+
+        # load the data
+        self.load_houses_data_pandas()
+        self.load_geojson()
+
+        # calculate average price
+        self.avg_price = self.calculate_average_price("city", "price")
 
     # Load the houses data
     def load_houses_data_pandas(self):
@@ -20,6 +30,8 @@ class StreamLitClass:
         self.houses_data["city"] = (
             self.houses_data["city"].str.lower().str.strip()
         )  # convert city names to lowercase and remove whitespaces
+        self.count_houses = self.houses_data["city"].value_counts().reset_index()
+        self.count_houses.columns = ["city", "count"]
 
     # Load the geojson file
     def load_geojson(self):
@@ -37,32 +49,40 @@ class StreamLitClass:
         )
 
     def plot_most_expensive_houses_average(self):
-        avg_price = self.calculate_average_price("city", "price")
-        self.plot_map(avg_price, "city", "properties.Communes", "price")
-
-    def plot_count_houses(self):
-        count_houses = self.houses_data["city"].value_counts().reset_index()
-        count_houses.columns = ["city", "count"]
-        self.plot_map(count_houses, "city", "properties.Communes", "count")
-
-    def plot_map(self, avg_price, locations, featureidkey, color):
+        if self.avg_price is None:
+            self.avg_price = self.calculate_average_price("city", "price")
         fig = px.choropleth_mapbox(
-            avg_price,
-            geojson=self.geojson.__geo_interface__,
-            locations=locations,
-            featureidkey=featureidkey,
-            color=color,
-            color_continuous_scale="RdYlBu",  # use the RdYlBu color scale
-            range_color=(0, 2500000),  # set the min and max values of the legend
+            self.avg_price,
+            geojson=self.geojson,
+            locations="city",
+            featureidkey="properties.Communes",
+            color="price",
+            color_continuous_scale="Plasma",
+            range_color=[self.avg_price["price"].min(), 2500000],
             mapbox_style="carto-positron",
             zoom=5,
             center={"lat": 50.8503, "lon": 4.3517},
             opacity=0.5,
             labels={"price": "Average price per municipality"},
         )
-        st.plotly_chart(
-            fig, use_container_width=True
-        )  # display the plot in the Streamlit app
+        st.plotly_chart(fig, use_container_width=True)
+
+    def plot_count_houses(self):
+        fig = px.choropleth_mapbox(
+            self.count_houses,
+            geojson=self.geojson,
+            locations="city",
+            featureidkey="properties.Communes",
+            color="count",
+            color_continuous_scale="Plasma",
+            range_color=[self.count_houses["count"].min(), 500],
+            mapbox_style="carto-positron",
+            zoom=5,
+            center={"lat": 50.8503, "lon": 4.3517},
+            opacity=0.5,
+            labels={"count": "Count of houses per municipality"},
+        )
+        st.plotly_chart(fig, use_container_width=True)
 
     def streamlit_app(self):
         st.set_page_config(page_title="Belgium Real Estate Analysis", layout="wide")
@@ -72,18 +92,14 @@ class StreamLitClass:
             "This is a simple web app that shows the average price of houses per municipality in Belgium"
         )
 
-        # load the data
-        self.load_houses_data_pandas()
-        self.load_geojson()
+        # calculate average price
+        if self.avg_price is None:
+            self.avg_price = self.calculate_average_price("city", "price")
 
-        # Create a sidebar selectbox for the plot selection
-        plot_option = st.sidebar.selectbox(
-            "Select a plot",
-            ("Average Price per Municipality", "Count of Houses per Municipality"),
-        )
+        # plot the average price of houses per municipality
+        st.subheader("Average price of houses per municipality")
+        self.plot_most_expensive_houses_average()
 
-        # Display the selected plot
-        if plot_option == "Average Price per Municipality":
-            self.plot_most_expensive_houses_average()
-        elif plot_option == "Count of Houses per Municipality":
-            self.plot_count_houses()
+        # plot the count of houses per municipality
+        st.subheader("Count of houses per municipality")
+        self.plot_count_houses()
