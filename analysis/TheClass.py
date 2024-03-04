@@ -40,6 +40,9 @@ class StreamLitClass:
         avg_price = self.calculate_average_price("city", "price")
         self.plot_map(avg_price, "city", "properties.Communes", "price")
 
+    def get_province(self, city):
+        return self.geojson[self.geojson["Communes"] == city]["Provinces"].values[0]
+
     def plot_map(self, avg_price, locations, featureidkey, color):
         fig = px.choropleth_mapbox(
             avg_price,
