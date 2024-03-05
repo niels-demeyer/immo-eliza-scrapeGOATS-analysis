@@ -94,7 +94,7 @@ class StreamLitClass:
     def plot_most_expensive_houses_average(self):
         if self.avg_price is None:
             self.avg_price = self.calculate_average_price("city", "price")
-        fig = px.choropleth_mapbox(
+        fig = px.choropleth(
             self.avg_price,
             geojson=self.geojson_cities,
             locations="city",
@@ -102,12 +102,16 @@ class StreamLitClass:
             color="price",
             color_continuous_scale="Plasma",
             range_color=[self.avg_price["price"].min(), 2500000],
-            mapbox_style="carto-positron",
-            zoom=5,
-            center={"lat": 50.8503, "lon": 4.3517},
-            opacity=0.5,
             labels={"price": "Average price per municipality"},
+            title="Average price per municipality",
         )
+        fig.update_geos(
+            showcountries=False,
+            showcoastlines=True,
+            showland=True,
+            fitbounds="locations",
+        )
+
         st.plotly_chart(fig, use_container_width=True)
 
     def plot_count_houses(self):
@@ -154,6 +158,27 @@ class StreamLitClass:
             fitbounds="locations",
         )
 
+    def plot_most_expensive_houses_average_static(self):
+        if self.avg_price is None:
+            self.avg_price = self.calculate_average_price("city", "price")
+        fig = px.choropleth(
+            self.avg_price,
+            geojson=self.geojson_cities,
+            locations="city",
+            featureidkey="properties.Communes",
+            color="price",
+            color_continuous_scale="Plasma",
+            range_color=[self.avg_price["price"].min(), 2500000],
+            labels={"price": "Average price per municipality"},
+            title="Average price per municipality",
+        )
+        fig.update_geos(
+            showcountries=False,
+            showcoastlines=True,
+            showland=True,
+            fitbounds="locations",
+        )
+
         st.plotly_chart(fig, use_container_width=True)
 
     def streamlit_app(self):
@@ -169,13 +194,14 @@ class StreamLitClass:
             self.avg_price = self.calculate_average_price("city", "price")
 
         # # plot the average price of houses per municipality
-        # st.subheader("Average price of houses per municipality")
+        st.subheader("Average price of houses per municipality")
         # self.plot_most_expensive_houses_average()
+        self.plot_most_expensive_houses_average_static()
 
         # # plot the count of houses per municipality
         # st.subheader("Count of houses per municipality")
         # self.plot_count_houses()
 
         # plot the count of houses per province
-        st.subheader("Count of houses per province")
-        self.plot_count_houses_per_province()
+        # st.subheader("Count of houses per province")
+        # self.plot_count_houses_per_province()
