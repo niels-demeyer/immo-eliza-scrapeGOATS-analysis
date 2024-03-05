@@ -43,14 +43,18 @@ class StreamLitClass:
         self.count_houses.columns = ["city", "count"]
 
     # Load the geojson file
+
     def load_geojson(self):
         script_dir = os.path.dirname(__file__)
-        rel_path = "../data/raw/BELGIUM_-_Municipalities.geojson"
+        rel_path = "../data/raw/provinces.geojson"
         file_path = os.path.join(script_dir, rel_path)
         self.geojson = gpd.read_file(file_path)
         self.geojson["Communes"] = (
             self.geojson["Communes"].str.lower().str.strip()
         )  # convert city names to lowercase and remove whitespaces
+        self.geojson["province"] = (
+            self.geojson["province"].str.lower().str.strip()
+        )  # convert province names to lowercase and remove whitespaces
 
     # Create a GeoJSON file with the borders of each province
     def create_province_geojson(self):
