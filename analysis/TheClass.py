@@ -11,13 +11,16 @@ class StreamLitClass:
     def __init__(self):
         self.houses_data = None
         self.geojson = None
+        self.geojson_cities = None
+        self.geojson_provinces = None
         self.count_houses = None
         self.avg_price = None
         self.provinces = None
 
         # load the data
         self.load_houses_data_pandas()
-        self.load_geojson()
+        self.load_geojson_cities()
+        self.load_geojson_provinces()
 
         # get cities per province
         self.provinces = {
@@ -42,19 +45,28 @@ class StreamLitClass:
         self.count_houses = self.houses_data["city"].value_counts().reset_index()
         self.count_houses.columns = ["city", "count"]
 
-    # Load the geojson file
+    # Load the geojson files
 
-    def load_geojson(self):
+    def load_geojson_cities(self):
+        script_dir = os.path.dirname(__file__)
+        rel_path = "../data/raw/BELGIUM_-_Municipalities.geojson"
+        file_path = os.path.join(script_dir, rel_path)
+        self.geojson_cities = gpd.read_file(file_path)
+        self.geojson_cities["Communes"] = (
+            self.geojson_cities["Communes"].str.lower().str.strip()
+        )  # convert city names to lowercase and remove whitespaces
+
+    def load_geojson_provinces(self):
         script_dir = os.path.dirname(__file__)
         rel_path = "../data/raw/provinces.geojson"
         file_path = os.path.join(script_dir, rel_path)
-        self.geojson = gpd.read_file(file_path)
-        self.geojson["Communes"] = (
-            self.geojson["Communes"].str.lower().str.strip()
+        self.geojson_provinces = gpd.read_file(file_path)
+        self.geojson_provinces["province"] = self.geojson_provinces[
+            "province"
+        ].str.strip()  # remove leading and trailing whitespaces
+        self.geojson_provinces["Communes"] = (
+            self.geojson_provinces["Communes"].str.lower().str.strip()
         )  # convert city names to lowercase and remove whitespaces
-        self.geojson["province"] = (
-            self.geojson["province"].str.lower().str.strip()
-        )  # convert province names to lowercase and remove whitespaces
 
     # Create a GeoJSON file with the borders of each province
     def create_province_geojson(self):
@@ -84,7 +96,7 @@ class StreamLitClass:
             self.avg_price = self.calculate_average_price("city", "price")
         fig = px.choropleth_mapbox(
             self.avg_price,
-            geojson=self.geojson,
+            geojson=self.geojson_cities,
             locations="city",
             featureidkey="properties.Communes",
             color="price",
@@ -101,7 +113,7 @@ class StreamLitClass:
     def plot_count_houses(self):
         fig = px.choropleth_mapbox(
             self.count_houses,
-            geojson=self.geojson,
+            geojson=self.geojson_cities,
             locations="city",
             featureidkey="properties.Communes",
             color="count",
@@ -113,6 +125,35 @@ class StreamLitClass:
             opacity=0.5,
             labels={"count": "Count of houses per municipality"},
         )
+        st.plotly_chart(fig, use_container_width=True)
+
+    def plot_count_houses_per_province(self):
+        # Remove trailing whitespaces from province names
+        self.houses_data["province"] = self.houses_data["province"].str.strip()
+
+        # Group the data by 'province' and count the number of houses
+        count_houses_per_province = (
+            self.houses_data.groupby("province").size().reset_index(name="count")
+        )
+
+        fig = px.choropleth(
+            count_houses_per_province,
+            geojson=self.geojson_provinces,
+            locations="province",
+            featureidkey="properties.province",
+            color="count",
+            color_continuous_scale="Plasma",
+            range_color=[count_houses_per_province["count"].min(), 500],
+            labels={"count": "Count of houses per province"},
+            title="Count of houses per province",
+        )
+        fig.update_geos(
+            showcountries=False,
+            showcoastlines=True,
+            showland=True,
+            fitbounds="locations",
+        )
+
         st.plotly_chart(fig, use_container_width=True)
 
     def streamlit_app(self):
@@ -127,10 +168,14 @@ class StreamLitClass:
         if self.avg_price is None:
             self.avg_price = self.calculate_average_price("city", "price")
 
-        # plot the average price of houses per municipality
-        st.subheader("Average price of houses per municipality")
-        self.plot_most_expensive_houses_average()
+        # # plot the average price of houses per municipality
+        # st.subheader("Average price of houses per municipality")
+        # self.plot_most_expensive_houses_average()
 
-        # plot the count of houses per municipality
-        st.subheader("Count of houses per municipality")
-        self.plot_count_houses()
+        # # plot the count of houses per municipality
+        # st.subheader("Count of houses per municipality")
+        # self.plot_count_houses()
+
+        # plot the count of houses per province
+        st.subheader("Count of houses per province")
+        self.plot_count_houses_per_province()
