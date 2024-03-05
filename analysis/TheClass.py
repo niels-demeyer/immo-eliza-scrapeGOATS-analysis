@@ -27,9 +27,6 @@ class StreamLitClass:
             for province in self.houses_data["province"].unique()
         }
 
-        # create a GeoJSON file with the borders of each province
-        self.create_province_geojson()
-
         # calculate average price
         self.avg_price = self.calculate_average_price("city", "price")
 
