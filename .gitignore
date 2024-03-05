@@ -7,7 +7,7 @@ __pycache__/
 *.so
 
 BELGIUM_-_Municipalities.geojson
-
+provinces.geojson
 # Distribution / packaging
 .Python
 build/
