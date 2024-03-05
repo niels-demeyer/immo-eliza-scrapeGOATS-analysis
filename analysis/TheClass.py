@@ -167,16 +167,25 @@ class StreamLitClass:
             locations="city",
             featureidkey="properties.Communes",
             color="price",
-            color_continuous_scale="Plasma",
+            color_continuous_scale="Plasma",  # Change color scale
             range_color=[self.avg_price["price"].min(), 2500000],
             labels={"price": "Average price per municipality"},
             title="Average price per municipality",
+            hover_name="city",  # Add hover name
+            hover_data=["price"],  # Add hover data
         )
         fig.update_geos(
             showcountries=False,
-            showcoastlines=True,
-            showland=True,
+            showcoastlines=False,
+            showland=False,
             fitbounds="locations",
+        )
+        fig.update_layout(
+            title_text="Average price per municipality",
+            title_x=0.5,  # Center the title
+            margin={"r": 10, "t": 30, "l": 10, "b": 10},  # Adjust margins
+            dragmode=False,  # Disable panning
+            hovermode="closest",  # Hover over the closest data
         )
 
         st.plotly_chart(fig, use_container_width=True)
