@@ -19,9 +19,6 @@ class StreamLitClass:
         self.load_houses_data_pandas()
         self.load_geojson()
 
-        # calculate average price
-        self.avg_price = self.calculate_average_price("city", "price")
-
         # get cities per province
         self.provinces = {
             province: self.houses_data[self.houses_data["province"] == province]["city"]
@@ -29,6 +26,12 @@ class StreamLitClass:
             .tolist()
             for province in self.houses_data["province"].unique()
         }
+
+        # create a GeoJSON file with the borders of each province
+        self.create_province_geojson()
+
+        # calculate average price
+        self.avg_price = self.calculate_average_price("city", "price")
 
     # Load the houses data
     def load_houses_data_pandas(self):
@@ -51,6 +54,24 @@ class StreamLitClass:
         self.geojson["Communes"] = (
             self.geojson["Communes"].str.lower().str.strip()
         )  # convert city names to lowercase and remove whitespaces
+
+    # Create a GeoJSON file with the borders of each province
+    def create_province_geojson(self):
+        # Create a reverse mapping from city to province
+        city_to_province = {
+            city: province
+            for province, cities in self.provinces.items()
+            for city in cities
+        }
+
+        # Add a 'province' column to the GeoJSON file
+        self.geojson["province"] = self.geojson["Communes"].map(city_to_province)
+
+        # Group by the 'province' column and merge the geometries
+        gdf_provinces = self.geojson.dissolve(by="province")
+
+        # Save to a new GeoJSON file
+        gdf_provinces.to_file("provinces.geojson", driver="GeoJSON")
 
     def calculate_average_price(self, group_by_column, agg_column):
         return (
