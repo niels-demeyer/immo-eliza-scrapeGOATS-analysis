@@ -13,6 +13,7 @@ class StreamLitClass:
         self.geojson = None
         self.count_houses = None
         self.avg_price = None
+        self.provinces = None
 
         # load the data
         self.load_houses_data_pandas()
@@ -20,6 +21,14 @@ class StreamLitClass:
 
         # calculate average price
         self.avg_price = self.calculate_average_price("city", "price")
+
+        # get cities per province
+        self.provinces = {
+            province: self.houses_data[self.houses_data["province"] == province]["city"]
+            .unique()
+            .tolist()
+            for province in self.houses_data["province"].unique()
+        }
 
     # Load the houses data
     def load_houses_data_pandas(self):
