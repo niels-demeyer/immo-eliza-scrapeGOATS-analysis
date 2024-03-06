@@ -36,7 +36,7 @@ class StreamLitClass:
     # Load the houses data
     def load_houses_data_pandas(self):
         script_dir = os.path.dirname(__file__)
-        rel_path = "../data/raw/houses_cleaned.csv"
+        rel_path = "../data/cleaned/cleaned_dataframe.csv"
         file_path = os.path.join(script_dir, rel_path)
         self.houses_data = pd.read_csv(file_path)
         self.houses_data["city"] = (
@@ -94,7 +94,7 @@ class StreamLitClass:
     def plot_most_expensive_houses_average(self):
         if self.avg_price is None:
             self.avg_price = self.calculate_average_price("city", "price")
-        fig = px.choropleth(
+        fig = px.choropleth_mapbox(
             self.avg_price,
             geojson=self.geojson_cities,
             locations="city",
@@ -102,14 +102,11 @@ class StreamLitClass:
             color="price",
             color_continuous_scale="Plasma",
             range_color=[self.avg_price["price"].min(), 2500000],
+            mapbox_style="carto-positron",
+            zoom=5,
+            center={"lat": 50.8503, "lon": 4.3517},
+            opacity=0.5,
             labels={"price": "Average price per municipality"},
-            title="Average price per municipality",
-        )
-        fig.update_geos(
-            showcountries=False,
-            showcoastlines=True,
-            showland=True,
-            fitbounds="locations",
         )
 
         st.plotly_chart(fig, use_container_width=True)
@@ -186,9 +183,9 @@ class StreamLitClass:
             margin={"r": 10, "t": 30, "l": 10, "b": 10},  # Adjust margins
             dragmode=False,  # Disable panning
             hovermode="closest",  # Hover over the closest data
+            plot_bgcolor="white",  # Set plot background to white
+            paper_bgcolor="white",  # Set paper background to white
         )
-
-        st.plotly_chart(fig, use_container_width=True)
 
     def streamlit_app(self):
         st.set_page_config(page_title="Belgium Real Estate Analysis", layout="wide")
@@ -204,8 +201,8 @@ class StreamLitClass:
 
         # # plot the average price of houses per municipality
         st.subheader("Average price of houses per municipality")
-        # self.plot_most_expensive_houses_average()
-        self.plot_most_expensive_houses_average_static()
+        self.plot_most_expensive_houses_average()
+        # self.plot_most_expensive_houses_average_static()
 
         # # plot the count of houses per municipality
         # st.subheader("Count of houses per municipality")
