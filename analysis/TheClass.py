@@ -202,15 +202,14 @@ class StreamLitClass:
         if self.avg_price is None:
             self.avg_price = self.calculate_average_price("city", "price")
 
-        # # plot the average price of houses per municipality
-        st.subheader("Average price of houses per municipality")
+        # # # plot the average price of houses per municipality
+        # st.subheader("Average price of houses per municipality")
         # self.plot_most_expensive_houses_average()
-        self.plot_most_expensive_houses_average_static()
 
         # # plot the count of houses per municipality
         # st.subheader("Count of houses per municipality")
         # self.plot_count_houses()
 
         # plot the count of houses per province
-        # st.subheader("Count of houses per province")
-        # self.plot_count_houses_per_province()
+        st.subheader("Count of houses per province")
+        self.plot_count_houses_per_province()
