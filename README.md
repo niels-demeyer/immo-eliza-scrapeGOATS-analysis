@@ -13,7 +13,19 @@ Our project aimed to identify investment opportunities in the Belgian housing ma
 
 ## Results 📈
 
-To see results of our analysis, please refer to the following files:
+To see results of our analysis, please refer to the following file:
+
+[PDF](https://github.com/Yanina-Andriienko/immo-eliza-scrapeGOATS-analysis/blob/main/reports/Report_immo_eliza_scrapegoats.pdf)
+
+You can also watch our intearctive maps by runnin the streamlit app.
+Make sure to download the geojson file from the following [Link](https://hub.arcgis.com/datasets/esribeluxdata::belgium-municipalities-1) and add it to the data/raw folder.
+
+```
+cd streamlit
+```
+```
+streamlit run app.py
+```
 
 ## Sources 📚
 
