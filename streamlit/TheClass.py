@@ -154,6 +154,7 @@ class StreamLitClass:
             showland=True,
             fitbounds="locations",
         )
+        st.plotly_chart(fig, use_container_width=True)
 
     def plot_most_expensive_houses_average_static(self):
         if self.avg_price is None:
@@ -185,7 +186,14 @@ class StreamLitClass:
             hovermode="closest",  # Hover over the closest data
             plot_bgcolor="white",  # Set plot background to white
             paper_bgcolor="white",  # Set paper background to white
+            font=dict(color="black"),  # Set font color to black
+            title_font=dict(color="black"),  # Set title color to black
+            coloraxis_colorbar=dict(
+                title_font=dict(color="black"),  # Set colorbar title color to black
+                tickfont=dict(color="black"),  # Set colorbar tick color to black
+            ),
         )
+        st.plotly_chart(fig, use_container_width=True)
 
     def streamlit_app(self):
         st.set_page_config(page_title="Belgium Real Estate Analysis", layout="wide")
@@ -202,12 +210,12 @@ class StreamLitClass:
         # # plot the average price of houses per municipality
         st.subheader("Average price of houses per municipality")
         self.plot_most_expensive_houses_average()
-        # self.plot_most_expensive_houses_average_static()
+        self.plot_most_expensive_houses_average_static()
 
-        # # plot the count of houses per municipality
-        # st.subheader("Count of houses per municipality")
-        # self.plot_count_houses()
+        # plot the count of houses per municipality
+        st.subheader("Count of houses per municipality")
+        self.plot_count_houses()
 
         # plot the count of houses per province
-        # st.subheader("Count of houses per province")
-        # self.plot_count_houses_per_province()
+        st.subheader("Count of houses per province")
+        self.plot_count_houses_per_province()

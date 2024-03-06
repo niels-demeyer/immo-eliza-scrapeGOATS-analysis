@@ -8,3 +8,5 @@ print(streamlit_app.houses_data["province"].unique())
 
 # Print unique provinces from geojson_provinces
 print(streamlit_app.geojson_provinces["province"].unique())
+
+streamlit_app.create_province_geojson()
